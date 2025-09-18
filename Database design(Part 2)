@@ -1,0 +1,57 @@
+CREATE TABLE Companies (
+    company_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    address VARCHAR(255)
+);
+
+CREATE TABLE Warehouses (
+    warehouse_id INT PRIMARY KEY AUTO_INCREMENT,
+    company_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    location VARCHAR(255),
+    FOREIGN KEY (company_id) REFERENCES Companies(company_id)
+);
+
+CREATE TABLE Products (
+    product_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(150) NOT NULL,
+    sku VARCHAR(50) UNIQUE NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    is_bundle BOOLEAN DEFAULT FALSE
+);
+
+
+CREATE TABLE Suppliers (
+    supplier_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(150) NOT NULL,
+    contact_email VARCHAR(100)
+);
+
+
+
+CREATE TABLE Product_Bundles (
+    bundle_id INT NOT NULL,
+    component_id INT NOT NULL,
+    quantity INT NOT NULL,
+    PRIMARY KEY (bundle_id, component_id),
+    FOREIGN KEY (bundle_id) REFERENCES Products(product_id),
+    FOREIGN KEY (component_id) REFERENCES Products(product_id)
+);
+
+
+
+-Questions for the Product Team
+
+1)Should SKUs be unique across the entire platform or only inside one company?
+
+2)Can a product exist in multiple companies, or is it tied to just one?
+
+3)Do we need to track users/employees who make inventory updates?
+
+4)Do suppliers always belong to one company, or can they serve multiple companies?
+
+5)Do different warehouses ever have different pricing for the same product?
+
+6)Do we need to track expiry dates or batch numbers for certain products?
+
+7)Is there a need for sales/purchase orders tables in the first version, or just stock tracking?
