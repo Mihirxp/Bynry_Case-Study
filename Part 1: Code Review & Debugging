@@ -1,0 +1,67 @@
+@app.route('/api/products', methods=['POST'])
+def create_product():
+    data = request.json
+    
+    # Create new product
+    product = Product(
+        name=data['name'],
+        sku=data['sku'],
+        price=data['price'],
+        warehouse_id=data['warehouse_id']
+    )
+    
+    db.session.add(product)
+    db.session.commit()
+    
+    # Update inventory count
+    inventory = Inventory(
+        product_id=product.id,
+        warehouse_id=data['warehouse_id'],
+        quantity=data['initial_quantity']
+    )
+    
+    db.session.add(inventory)
+    db.session.commit()
+    
+    return {"message": "Product created", "product_id": product.id}
+
+
+
+
+
+
+
+
+
+
+
+
+Problems & Impacts
+
+1)Two commits back-to-back
+
+Right now, the product is saved first and then inventory is saved in a separate commit. If the second one fails, you’ll have a product without inventory. That leads to inconsistent data.
+
+2)Warehouse ID stored inside Product
+
+A product shouldn’t belong to just one warehouse. Products should be global, and their quantities should be tracked per warehouse through the inventory table. The current design locks a product to one warehouse.
+
+3)No check for SKU uniqueness
+
+SKUs are supposed to be unique identifiers, but this code doesn’t enforce that. You could end up with duplicate SKUs, which will create chaos in inventory and reporting.
+
+4)No input validation
+
+If a field is missing (say price or initial_quantity), the code will just throw an error or save invalid data. It should validate and return a proper error message instead.
+
+No check if warehouse actually exists
+
+The code just assumes the warehouse_id sent is valid. If it points to a non-existent warehouse, you’ll end up with broken references in your database.
+
+5)Possible duplicate inventory rows
+
+Nothing prevents multiple inventory records for the same product + warehouse combination. This can lead to incorrect stock counts unless you enforce uniqueness.
+
+6)Price stored as float
+
+Storing money as a float is risky because of precision errors (e.g., 19.999999 instead of 20). It’s better to use a Decimal field or numeric with fixed precision
