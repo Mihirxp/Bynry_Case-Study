@@ -1,0 +1,39 @@
+alert = {
+                    "product_id": product.product_id,
+                    "product_name": product.name,
+                    "sku": product.sku,
+                    "warehouse_id": wh.warehouse_id,
+                    "warehouse_name": wh.name,
+                    "current_stock": inv.quantity,
+                    "threshold": threshold,
+                    "days_until_stockout": days_until_stockout,
+                    "supplier": {
+                        "id": supplier.supplier_id if supplier else None,
+                        "name": supplier.name if supplier else None,
+                        "contact_email": supplier.contact_email if supplier else None
+                    }
+                }
+                alerts.append(alert)
+
+
+
+
+
+--Explanation of Approach
+
+1)Get all warehouses for the given company.
+2)For each warehouse, check inventory records.
+3)Skip products without recent sales (last 30 days).
+4)Compare current stock to threshold (default or per-product).
+5)If stock < threshold → prepare an alert.
+6)Compute days until stockout using recent sales activity.
+7)Fetch supplier info (id, name, email).
+8)Return structured JSON with all alerts + total count.
+
+--Edge Cases Considered
+
+1)No warehouses → returns empty alerts array.
+2)No recent sales → product skipped.
+3)No supplier linked → supplier field is null.
+4)Division by zero → safe handling when no sales.
+5)Different thresholds → supported per product (default fallback).
